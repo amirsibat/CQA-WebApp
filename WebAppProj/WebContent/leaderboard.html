@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Welcome to CQA</title>
+
+
+	<!-- Javascript -->
+    <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+
+	<!-- CSS -->
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,100,300,500">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- AngularJS library -->
+	<script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+
+<script type="text/javascript">
+
+	$(document).ready(function() {
+
+		
+	    $(window).load(function () {
+	        setTimeout(function(){
+
+			$.ajax({
+		        url: "/WebAppProj/user/SessionAuth",
+		        type: 'GET',
+		        contentType: "application/json; charset=utf-8",
+		        success: function(data) {
+		        	if(data.result == "success"){
+						console.log("success");
+		    		}
+		        }
+		    	})
+				
+		    	.done(function (data) {
+		    		if(data.result == "success"){
+						console.log("success");
+		    		}
+			        	else{ window.location.pathname = "/WebAppProj/index.html"; } // if Authintication failed send user to index.html
+		    	 })
+		    	 .fail( function (data) {
+		    		 console.log(data);
+		    	 });
+			$('#preloader').fadeOut('slow', function () { // fadeOut preloader in 2 sec
+            });
+        },2000);
+
+    	});
+
+
+
+    	 // will logout the user. 
+	    $("#logout_btn").click(function() {
+	    	$.ajax({
+		        url: "/WebAppProj/user/LogoutUser",
+		        type: 'GET'
+		    	}).done(function (data) {
+		    		if(data.result == "success"){
+						window.location.pathname = "/WebAppProj/index.html"; // send user to index.html page
+		    		}
+		    	 }).fail( function (data) {
+		    		 console.log(data.result);
+		    	 });
+	    	
+	    	});
+	});
+
+	</script>
+</head>
+
+
+<body>
+<div id="TopDiv"></div>
+<div id="preloader"></div>
+
+	<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="cqa.html"><span class="glyphicon glyphicon-home" aria-hidden="true"></span> HOME</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="cqa.html">ASK</a></li>
+        <li><a href="popular_topics.html"><span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>  TOP TOPICS</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li class="active"><a href="leaderboard.html"><span class="glyphicon glyphicon-signal" aria-hidden="true"></span>  LEADERBOARD<span class="sr-only">(current)</span></a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>  USER <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="profile.html">MY PROFILE</a></li>
+            
+            <li role="separator" class="divider"></li>
+            <li><a href="#" id="logout_btn">LOGOUT</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+<div class="page-header">
+  <h2 id="PageHeader">User's Leaderboard</h2>
+</div>
+
+ <div class="container">
+ 	
+ 		<div class="users-container" data-ng-app="UsersApp" data-ng-controller="UsersController">
+
+ 		<div id="LoadingViewDiv"><img src="img/loading_questions.gif" class="loading_questions" alt="loading questions"></div>
+
+ 		<!-- 	DISPLAY USERS 	 -->
+ 		<div id="UsersDiv" class="UsersDiv">
+	<ul class="media-list">
+	
+
+	<!-- ################  DISPLAY User ################-->
+		<li data-ng-repeat="user in usersArray | limitTo: paginationLimit()" class="paginationclass">
+		<hr>
+			 <div class="media-left">
+		  		<a class = "pull-left" href="#">
+		    	<img class="media-object" data-ng-src={{user.PhotoURL}} alt="Photo">
+		  		</a>
+		  	</div>
+
+		  <div class="media-body">
+		    <h4 class="media-heading">
+		    <b><a data-ng-href="{{getNicknameAsLink(user.Nickname);}}">
+		    {{ user.Nickname }}</a></b>
+		    
+		    </h4>
+		    <div class="leaderRate">
+		     <p ><b>Rating:</b>  {{ user.rate }}</p>
+		     <p><b>Expertise:  </b>
+
+		  	  <span data-ng-repeat="exp in user.expertise">{{ exp.topic}} {{$last ? '' : ($index==user.expertise.length-2) ? ' and ' : ', '}} </span>
+
+		     </p>
+
+		    </div>    
+
+		  </div>
+		</li>		
+	</ul> 
+	
+	<div class="pagination pagination-centered">
+		
+    	<button class="btn btn-primary" data-ng-show="hasMoreItemsToShow()" data-ng-click="showMoreItems()">Show more</button>
+	</div>
+
+</div><!-- 	DISPLAY USERS  END	 -->
+
+
+ 		</div> <!--users-container -->
+ 	
+</div> <!-- container end -->
+
+
+
+<!-- AngularJS module -->
+<script>
+
+var app = angular.module('UsersApp',[])
+		.controller('UsersController', ['$scope','$sce','$http','$interval', function($scope,$sce,$http,$interval) {
+
+			//Get All Users in json array 
+			var usersArray,getURL;
+			
+
+			$scope.getURL = "/WebAppProj/user/GetTopUsers";	
+
+		//$http is AngularJS way to do ajax-like communications
+		// call this function every 2 seconds to poll data from server
+		
+		$http.get($scope.getURL)
+			.success(function(response) {					
+					$scope.usersArray = response; // this variable will hold the questions of users
+				// loop over and check if photoURL empty, then change it to the default image.
+			   	for (var i = $scope.usersArray.length - 1 ; i >= 0; i--) {
+				    if($scope.usersArray[i].PhotoURL ==""){
+
+				    	$scope.usersArray[i].PhotoURL = "img/default-photo.png";
+				    	}
+				    }
+					
+				    //show more functionality
+					$scope.usersArray = response;
+					
+					var pagesShown = 1;
+		
+					var pageSize = 3;
+
+					$scope.paginationLimit = function(response) {
+						 return pageSize * pagesShown;
+					};
+
+					$scope.hasMoreItemsToShow = function() {
+						 return pagesShown < ($scope.usersArray.length / pageSize);
+					};
+
+					$scope.showMoreItems = function() {
+						 pagesShown = pagesShown + 1;       
+					}; 
+
+ 			$scope.hideLoading(); // call hideLoading fun.
+						
+			});
+
+$scope.hideLoading = function() {
+		
+		// will fade out LoadingDiv and show Messages in 3 seconds.
+		setTimeout(function(){$('#LoadingViewDiv').fadeOut(1000);
+		$('#QestionDiv').delay(1000).fadeIn(500);
+	 
+	 },2000);
+	
+	};
+
+	// make nickname clickable
+	$scope.getNicknameAsLink = function(nickname)
+	{
+	return "profile.html?name="+nickname;
+	};
+
+
+}]);
+</script>
+<!-- AngularJS module  END -->
+</body>
+</html>

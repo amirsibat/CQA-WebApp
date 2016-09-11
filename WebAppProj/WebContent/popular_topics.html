@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Welcome to CQA</title>
+
+
+	<!-- Javascript -->
+    <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+   <!-- d3js library -->
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="js/d3.layout.cloud.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+
+	<!-- CSS -->
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,100,300,500">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- AngularJS library -->
+	<script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+
+
+	<script type="text/javascript">
+		
+	$(document).ready(function() {
+		
+		$.ajax({
+     	    url: "/WebAppProj/topic/GetMostPopularTopics",
+     	    type: 'GET',
+     	    contentType: "application/json; charset=utf-8",
+     	    success: function(data) {
+     	        	
+     	        	InitTopicChart(data);
+     	    		}
+     	        });
+
+		
+	    $(window).load(function () {
+	        setTimeout(function(){
+
+			$.ajax({
+		        url: "/WebAppProj/user/SessionAuth",
+		        type: 'GET',
+		        contentType: "application/json; charset=utf-8",
+		        success: function(data) {
+		        	if(data.result == "success"){
+						console.log("success");
+		    		}
+		        }
+		    	})
+				
+		    	.done(function (data) {
+		    		if(data.result == "success"){
+						console.log("success");
+		    		}
+			        	else{ window.location.pathname = "/WebAppProj/index.html"; } // if Authintication failed send user to index.html
+		    	 })
+		    	 .fail( function (data) {
+		    		 console.log(data);
+		    	 });
+			$('#preloader').fadeOut('slow', function () { // fadeOut preloader in 2 sec
+            });
+        },2000);
+
+    	});
+
+
+
+    	 // will logout the user. 
+	    $("#logout_btn").click(function() {
+	    	$.ajax({
+		        url: "/WebAppProj/user/LogoutUser",
+		        type: 'GET'
+		    	}).done(function (data) {
+		    		if(data.result == "success"){
+						window.location.pathname = "/WebAppProj/index.html"; // send user to index.html page
+		    		}
+		    	 }).fail( function (data) {
+		    		 console.log(data.result);
+		    	 });
+	    	
+	    	});
+	});
+
+	</script>
+</head>
+
+<body>
+<div id="TopDiv"></div>
+<div id="preloader"></div>
+
+	<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="cqa.html"><span class="glyphicon glyphicon-home" aria-hidden="true"></span> HOME</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="cqa.html">ASK</a></li>
+        <li class="active"><a href="popular_topics.html"><span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>  TOP TOPICS<span class="sr-only">(current)</span></a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="leaderboard.html"><span class="glyphicon glyphicon-signal" aria-hidden="true"></span>  LEADERBOARD</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>  USER <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="profile.html">MY PROFILE</a></li>
+            
+            <li role="separator" class="divider"></li>
+            <li><a href="#" id="logout_btn">LOGOUT</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+  
+  <div class="page-header">
+  <h2 id="PageHeader">All Time Popular Topics</h2>
+</div>
+
+
+<div class="container"> 
+	 <div id="vis"></div>
+
+<script>
+
+function InitTopicChart(data) {
+
+var fill = d3.scale.category20();
+
+var layout = d3.layout.cloud()
+    .size([800, 800])
+    .words(data.map(function(d) {
+      return {text: d.topic, size: d.popularity + Math.random() * 60};
+    }))
+    .padding(5)
+    .rotate(function() { return ~~(Math.random() * 2) * 30; })
+    .font("Impact")
+    .fontSize(function(d) { return d.size; })
+
+    .on("end", draw);
+
+layout.start();
+
+function draw(words) {
+  d3.select("body").append("svg")
+      .attr("width", layout.size()[0])
+      .attr("height", layout.size()[1])
+    .append("g")
+      .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+    .selectAll("text")
+      .data(words)
+    .enter().append("text")
+      .style("font-size", function(d) { return d.size + "px"; })
+      .style("font-family", "Impact")
+      .style("fill", function(d, i) { return fill(i); })
+      .attr("text-anchor", "middle")
+      .attr("transform", function(d) {
+        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+      })
+      .attr('onclick', function (d) {
+      	var topic = d.text;
+      	topic = "#" + topic;
+      return "location.href='topic.html" + topic +"';";
+      })
+      .attr('class','tagCloud')
+      .text(function(d) { return d.text; });
+  	  
+}
+}
+
+
+</script>
+
+
+</div> <!-- container END -->
+</body>
+</html>

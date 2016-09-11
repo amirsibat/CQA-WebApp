@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Welcome to CQA</title>
+
+
+	<!-- Javascript -->
+    <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+
+	<!-- CSS -->
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,100,300,500">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- AngularJS library -->
+	<script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+
+
+	<script type="text/javascript">
+
+	$(document).ready(function() {
+
+		
+	    $(window).load(function () {
+	        setTimeout(function(){
+
+			$.ajax({
+		        url: "/WebAppProj/user/SessionAuth",
+		        type: 'GET',
+		        contentType: "application/json; charset=utf-8",
+		        success: function(data) {
+		        	if(data.result == "success"){
+						console.log("success");
+		    		}
+		        }
+		    	})
+				
+		    	.done(function (data) {
+		    		if(data.result == "success"){
+						console.log("success");
+		    		}
+			        	else{ window.location.pathname = "/WebAppProj/index.html"; } // if Authintication failed send user to index.html
+		    	 })
+		    	 .fail( function (data) {
+		    		 console.log(data);
+		    	 });
+			$('#preloader').fadeOut('slow', function () { // fadeOut preloader in 2 sec
+            });
+        },2000);
+
+    	});
+
+
+
+    	 // will logout the user. 
+	    $("#logout_btn").click(function() {
+	    	$.ajax({
+		        url: "/WebAppProj/user/LogoutUser",
+		        type: 'GET'
+		    	}).done(function (data) {
+		    		if(data.result == "success"){
+						window.location.pathname = "/WebAppProj/index.html"; // send user to index.html page
+		    		}
+		    	 }).fail( function (data) {
+		    		 console.log(data.result);
+		    	 });
+	    	
+	    	});
+	});
+
+	</script>
+</head>
+
+
+<body>
+<div id="TopDiv"></div>
+<div id="preloader"></div>
+
+	<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="cqa.html"><span class="glyphicon glyphicon-home" aria-hidden="true"></span> HOME</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="cqa.html">ASK<span class="sr-only">(current)</span></a></li>
+        <li><a href="popular_topics.html"><span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>  TOP TOPICS</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="leaderboard.html"><span class="glyphicon glyphicon-signal" aria-hidden="true"></span>  LEADERBOARD</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>  USER <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="profile.html">MY PROFILE</a></li>
+            
+            <li role="separator" class="divider"></li>
+            <li><a href="#" id="logout_btn">LOGOUT</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+
+
+
+<div class="page-header">
+  <h2 id="PageHeader">Post A Question</h2>
+</div>
+
+
+<div class="questions-container" data-ng-app="QuestionsApp" data-ng-controller="QuestionsController">
+ <div class="container">
+	<div class="jumbotron">
+ 		<div class="container">
+
+ 		<div class="alert alert-success alert-dismissible alertPostQuestSuc" role="alert">Question Posted successfuly!
+		</div>
+		<div class="alert alert-danger alert-dismissible alertPostQuestEmpty" role="alert">Please Ask a Question!
+		</div>
+		
+		<div class="alert alert-danger alert-dismissible RateQuestDiv" role="alert"></div>
+		<div class="alert alert-danger alert-dismissible RateAnswerDiv" role="alert"></div>
+
+		<div class="alert alert-success alert-dismissible RateQuestSucDiv" role="alert"></div>
+		<div class="alert alert-success alert-dismissible RateAnswerSucDiv" role="alert"></div>
+
+		<button type="button" id="btn_show_newst" class="btn btn-primary" data-ng-click="btn_newst_questions();">Top 20 Newst Questions</button>
+		<button type="button" id="btn_all_questions" class="btn btn-primary" data-ng-click="btn_all_questions();">All Questions</button>
+			<div id="PostQuestDiv" class="media">
+				<div class="form-group">
+			        <label class="sr-only" for="title">Topic</label>
+			        <input type="text" name="topic" placeholder="Topic" data-ng-model="topic" maxlength="50" class="form-username form-control" id="topic">
+			     </div>
+			<div class="form-group">
+				<textarea class="form-control" id="txtQuest" data-ng-model="txtQuest" maxlength="300" placeholder="Your Question" cols="8" rows="4"></textarea>
+			</div>
+
+
+			<div class="form-group pull-right">
+				<button type="button" class="btn btn-primary" data-ng-click="btn_post_quest();">Ask</button>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+
+<div id="LoadingViewDiv"><img src="img/loading_questions.gif" class="loading_questions" alt="loading questions"></div>
+		
+
+		 <!-- 	DISPLAY QUESTIONS 	 -->
+
+<div id="QuestionDiv" class="QuestionDiv">
+	<ul class="media-list">
+		
+
+
+	<!-- ################  DISPLAY QUESTION ################-->
+		<li data-ng-repeat="quest in questsArray | limitTo: paginationLimit()" class="paginationclass">
+		<hr>
+			 <div class="media-left">
+		  		<a class = "pull-left" href="#">
+		    	<img class="media-object" data-ng-src={{quest.user.PhotoURL}} alt="Photo">
+		  		</a>
+		  	</div>
+
+		  <div class="media-body">
+		    <h4 class="media-heading">
+		    <b><a data-ng-href="{{getNicknameAsLink(quest.Posted_by_Nickname);}}">
+		    {{ quest.Posted_by_Nickname }}</a></b>
+		    {{ quest.pubDate }}
+		    </h4>
+		    
+		     <p>Topic:  {{ quest.Topic }}</p>
+		      <p>Content: {{ quest.Content }}</p> 
+		   
+
+		    <span>
+		    <a href="javascript:void(0);" data-ng-click="LikeQuest(quest.questID,quest.Posted_by_userID,quest.Posted_by_Nickname);">like</a> |
+		    <a href="javascript:void(0);" data-ng-click="DisLikeQuest(quest.questID,quest.Posted_by_userID,quest.Posted_by_Nickname);">Dislike</a> |
+		    <a href="javascript:void(0);" data-ng-click="AnswerQuestModalPop(quest.questID);">Answer</a> |
+		    <a href="javascript:void(0);" data-ng-click="">Rate: {{ quest.popularity }}</a>  |
+		    <a href="javascript:void(0);" data-ng-click="">Voting: {{ quest.Rate }}</a>
+		    
+		    </span>
+		
+		    						<!-- NESTED MEDIA --> 
+		    	<!-- ################  DISPLAY ANSWER ################-->
+	
+		   <div id="AnswerDiv" class="AnswerDiv">
+		    <ul class="media-list" data-ng-attr-id="{{'obj-' +quest.id}}" >
+		   
+		  	<li data-ng-repeat="answer in quest.AnswersArray | limitTo: quest.limit  track by $index " class="toggle-it" >
+		  	<hr>
+		  		 <div class="media-left">
+		  			<a class = "pull-left" href="#">
+		    			<img class="media-object" data-ng-src={{answer.user.PhotoURL}} alt="Photo">
+		  			</a>
+		  		</div>
+
+		  		<div  class="media-body">
+		  			<h4 class="media-heading">
+		   			<b><a data-ng-href="{{getNicknameAsLink(answer.Posted_by_Nickname);}}">
+		    		{{ answer.Posted_by_Nickname }}</a></b>
+		    		{{ answer.pubDate }}
+		    		</h4>
+		    	
+		    		<p>Answer: {{ answer.Content }}</p> 
+		    	
+		    		<span>
+		    		<a href="javascript:void(0);" data-ng-click="LikeAnswer(answer.ansID,answer.Posted_by_userID,answer.Posted_by_Nickname);">  <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>  Like  </a>  |
+		    		<a href="javascript:void(0);" data-ng-click="DisLikeAnswer(answer.ansID,answer.Posted_by_userID,answer.Posted_by_Nickname);"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>  DisLike  </a>   |
+		     		<a href="javascript:void(0);" data-ng-click="">Rate: {{ answer.Rate }}</a>
+		    		</span>
+			
+		  		</div>			
+		  	</li>
+		  	
+		  </ul>
+				<div class="toggle-it" id="toggle_btn">
+		    			
+		    		<button data-ng-show="quest.AnswersArray.length > 2" data-ng-hide="quest.limit > quest.AnswersArray.length || quest.AnswersArray.length < 2 || quest.limit == quest.AnswersArray.length || quest.limit == 0" data-ng-click="increment($index)">Show more</button>
+		    			 <button data-ng-show="quest.AnswersArray.length > 2" data-ng-hide="quest.limit == quest.AnswersArray.length  || quest.limit < quest.AnswersArray.length || quest.limit == 0" data-ng-click="resetLimit($index)">Hide</button> 
+		  		</div>	
+		  	 	
+ 		</div> <!-- ANSWER END  -->
+ 		
+	  </div>
+	</li><!-- QUESTION END  -->
+	
+			
+</ul> 
+
+	
+	
+	<div class="pagination pagination-centered">
+		
+    	<button class="btn btn-primary" data-ng-show="hasMoreItemsToShow()" data-ng-click="showMoreItems()">Show more</button>
+	</div>
+    	
+			
+</div>
+		
+<!-- Answer Modal -->
+
+		<div class="modal fade" id="AnswerQuestModal" tabindex="-1" role="dialog" aria-hidden="true">
+  			<div class="modal-dialog">
+    			<div class="modal-content">
+     				 <div class="modal-header">
+        				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        				<h4 class="modal-title">Answer Question</h4>
+      					</div>
+      				<div class="modal-body">
+       					 <div class="form-group">
+							<textarea autofocus class="form-control" data-ng-model="answerText" id="answerText" maxlength="300" placeholder="Your Answer" cols="8" rows="4"></textarea>
+						</div>
+					<div class="form-group pull-right">
+						<button type="button" class="btn btn-primary" data-ng-click="AnswerQuest();" >Post Answer</button>
+					</div>
+        			<br><br>
+      				</div>
+    			</div>
+ 			 </div>
+		</div>
+
+<!-- Reply Modal -->
+	 
+	
+</div>
+
+
+<!-- AngularJS module -->
+ <script>
+
+ 
+
+ 	var app = angular.module('QuestionsApp',[])
+		.controller('QuestionsController', ['$scope','$sce','$http','$interval', function($scope,$sce,$http,$interval) {
+		
+			//Get All Users in json array 
+			var usersArray,getURL;
+			$http.get("/WebAppProj/user/GetAllUsers")
+			
+			.success(function(response){
+				usersArray = response;
+
+			});
+
+
+
+
+	$scope.hideLoading = function() {
+		
+		// will fade out LoadingDiv and show Messages in 3 seconds.
+		setTimeout(function(){$('#LoadingViewDiv').fadeOut(1000);
+		$('#QestionDiv').delay(1000).fadeIn(500);
+	 
+	 },2000);
+	
+	};
+
+	
+
+	
+
+	$scope.resetLimit = function (index) {
+		 
+		 $scope.questsArray_limit[index].limit = 1;
+		 
+	}
+
+	
+	$scope.increment = function (index) {
+		 
+		 $scope.questsArray_limit[index].limit += 3;
+		 
+	}
+
+
+ 	$scope.btn_newst_questions = function() {
+ 		$('#PageHeader').html($('#btn_show_newst').html()); // change page header
+		
+		$('#LoadingViewDiv').height($('#QuestionDiv').height()).show(); // set LoadingViewDiv height to overly the same area of Questions
+		
+		$('#QuestionDiv').show(); // show QUESTIONS
+
+		$scope.getURL = "/WebAppProj/question/GetTop20NewQuestions"; // change the getURL to get Top 20 Popular Questions
+		
+		
+			$http.get($scope.getURL)
+				.success(function(response) {	
+
+						$scope.questsArray = response; //this variable will hold the questions of users
+						
+						for (var i = 0 ; i < $scope.questsArray.length; i++) {
+					    	$scope.questsArray[i].limit = 0;
+					    }
+						
+						// loop over and check if photoURL empty, then change it to the default image.
+						for (var i = $scope.questsArray.length - 1 ; i >= 0; i--) {
+				    if($scope.questsArray[i].user.PhotoURL ==""){
+
+				    	$scope.questsArray[i].user.PhotoURL = "img/default-photo.png";
+				    }
+				    }
+
+						//show more functionality
+
+						var pagesShown = 1;
+		
+						var pageSize = 3;
+
+						$scope.paginationLimit = function(response) {
+						 return pageSize * pagesShown;
+						};
+
+						$scope.hasMoreItemsToShow = function() {
+						 return pagesShown < ($scope.questsArray.length / pageSize);
+						};
+
+						$scope.showMoreItems = function() {
+						 pagesShown = pagesShown + 1;       
+						}; 	
+
+						
+
+				});
+		
+		$scope.hideLoading(); // call hideLoading fun.
+		$('#toggle_btn').hide();
+	};
+	
+
+	$scope.btn_all_questions= function() {
+		$('#PageHeader').html($('#btn_all_questions').html()); // change page header
+		$('#LoadingViewDiv').height($('#QuestionDiv').height()).show(); // set LoadingViewDiv height to overly the same area of Questions
+		$('#QuestionDiv').show(); // show QUESTIONS
+		$scope.getURL = "/WebAppProj/question/GetAllQuestions"; 
+		
+		$http.get($scope.getURL)
+			 .success(function(response) {	
+
+			 	$scope.questsArray = response;
+				$scope.questsArray_limit = response; //this variable will hold the questions of users
+				
+				for (var i = 0 ; i < $scope.questsArray_limit.length; i++) {
+						if($scope.questsArray_limit[i].Answers_count == 0) 
+							$scope.questsArray_limit[i].limit = 0;
+						else
+				    		$scope.questsArray_limit[i].limit = 1;
+				    }
+
+
+				   	for (var i = $scope.questsArray.length - 1 ; i >= 0; i--) {
+				    if($scope.questsArray[i].user.PhotoURL ==""){
+
+				    	$scope.questsArray[i].user.PhotoURL = "img/default-photo.png";
+				    }
+				    }
+				// loop over and check if photoURL empty, then change it to the default image.
+			   	for (var i = $scope.questsArray.length - 1 ; i >= 0; i--) {
+			   		for(var j = $scope.questsArray[i].AnswersArray.length - 1; j >= 0; j--)
+				    
+
+				    if($scope.questsArray[i].AnswersArray[j].user.PhotoURL ==""){
+
+				    	$scope.questsArray[i].AnswersArray[j].user.PhotoURL = "img/default-photo.png";
+				    }
+				    }
+
+				
+				//show more functionality
+				 $scope.pagesShown = 1;
+				$scope.pageSize = 3;
+				
+				
+				$scope.paginationLimit = function(response) {
+				 return $scope.pageSize * $scope.pagesShown;
+				};
+				
+				$scope.hasMoreItemsToShow = function() {
+				 return $scope.pagesShown < ($scope.questsArray.length / $scope.pageSize);
+				};
+				
+
+				$scope.showMoreItems = function() {
+				 $scope.pagesShown = $scope.pagesShown + 1;       
+				}; 
+				
+		});
+
+		$interval(function(){
+			$http.get($scope.getURL)
+			 .success(function(response) {	
+
+
+				$scope.questsArray = response; //this variable will hold the questions of users
+				
+				for (var i = 0 ; i < $scope.questsArray.length; i++) {
+						
+				    		$scope.questsArray[i].limit = $scope.questsArray_limit[i].limit;
+				    }
+
+				    
+				    if($scope.questsArray[i].AnswersArray.length !== undefined)
+				    {
+				   	for (var i = $scope.questsArray.length - 1 ; i >= 0; i--) {
+				    if($scope.questsArray[i].user.PhotoURL ==""){
+
+				    	$scope.questsArray[i].user.PhotoURL = "img/default-photo.png";
+				    }
+				    }
+				// loop over and check if photoURL empty, then change it to the default image.
+			   	for (var i = $scope.questsArray.length - 1 ; i >= 0; i--) {
+			   		for(var j = $scope.questsArray[i].AnswersArray.length - 1; j >= 0; j--)
+				    
+
+				    if($scope.questsArray[i].AnswersArray[j].user.PhotoURL ==""){
+
+				    	$scope.questsArray[i].AnswersArray[j].user.PhotoURL = "img/default-photo.png";
+				    }
+				    }
+
+				}
+				
+				
+		});
+		},2000);
+
+		$scope.questsArray_limit = $scope.questsArray;
+
+		$scope.hideLoading(); // call hideLoading fun.
+	
+		
+		
+
+}	
+
+
+	// make nickname clickable
+	$scope.getNicknameAsLink = function(nickname)
+	{
+	return "profile.html?name="+nickname;
+	};
+
+
+	// post message func
+	$scope.btn_post_quest = function() {
+		
+        if(($('#txtQuest').val().trim().length > 0 ) && ($('#topic').val().trim().length > 0)){
+        	
+        	//create js object
+    		var Quest = new Object();
+    		Quest.Topic = $scope.topic;
+    	    Quest.Content = $scope.txtQuest;
+    	    
+    	    //Make and http call to the server
+        	var req = $http({
+                method: "post",
+                url: "/WebAppProj/question/PostQuestion",
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+    	        data: JSON.stringify(Quest)
+
+            });
+            var data = JSON.stringify(Quest);
+
+    	    req.success(function(response) {
+    	    	$('.alertPostQuestSuc').show(1000).delay(3000).hide(1000); // show for 3 seconds and hide
+    	    	$scope.topic = ""; //clear topic
+    	    	$scope.txtQuest = ""; // clear textarea
+    		});	
+
+        }
+        else{
+        	$('.alertPostQuestEmpty').show(1000).delay(3000).hide(1000); // show for 3 seconds and hide
+        }
+    };
+
+
+    // rate question func
+	$scope.LikeQuest = function(questID,Posted_by_userID,nickname){		
+	    
+		$http.get("/WebAppProj/RateQuestion/1/id/"+ Posted_by_userID + "/quest/" +  questID)
+		.success(function(response) {
+			if(response.result == 'success'){
+		    	//alert("You Rated a Question Posted By "+ nickname);
+		    	$('.RateQuestSucDiv').html(response.message).show(1000).delay(3000).hide(1000);
+		    	}
+		    	else if(response.result == 'fail')
+		    		{
+		    			
+		    		//Scroll Up to Top
+			    	$('html, body').animate({
+			            scrollTop: $("#TopDiv").offset().top
+			        }, 1000);
+		    		$('.RateQuestDiv').html(response.message).show(1000).delay(3000).hide(1000);
+		    		}
+		});
+	};
+
+
+		// rate question func
+	$scope.DisLikeQuest = function(questID,Posted_by_userID,nickname){		
+	    
+		$http.get("/WebAppProj/RateQuestion/0/id/"+Posted_by_userID + "/quest/" +  questID)
+		.success(function(response) {
+			if(response.result == 'success'){
+		    	//alert("You Rated a Question Posted By "+nickname);
+		    	$('.RateQuestSucDiv').html(response.message).show(1000).delay(3000).hide(1000);
+		    	}
+		    	else if(response.result == 'fail')
+		    		{
+		    			
+		    		//Scroll Up to Top
+			    	$('html, body').animate({
+			            scrollTop: $("#TopDiv").offset().top
+			        }, 1000);
+		    		$('.RateQuestDiv').html(response.message).show(1000).delay(3000).hide(1000);
+		    		}
+		   
+		});
+		};
+
+
+    // rate answer func
+	$scope.LikeAnswer = function(ansID,Posted_by_userID,nickname){		
+	    
+		$http.get("/WebAppProj/RateAnswer/1/id/"+ Posted_by_userID + "/answer/" +  ansID)
+		.success(function(response) {
+			if(response.result == 'success'){
+		    	//alert("You Rated an Answer Posted By "+nickname);
+		    	$('.RateAnswerSucDiv').html(response.message).show(1000).delay(3000).hide(1000);
+		    	}
+		    	else if(response.result == 'fail')
+		    		{
+		    		
+		    		//Scroll Up to Top
+			    	$('html, body').animate({
+			            scrollTop: $("#TopDiv").offset().top
+			        }, 1000);
+		    		$('.RateAnswerDiv').html(response.message).show(1000).delay(3000).hide(1000);
+		    		}
+		   
+		});
+		};
+
+
+
+	// rate answer func
+	$scope.DisLikeAnswer = function(ansID,Posted_by_userID,nickname){		
+	    
+		$http.get("/WebAppProj/RateAnswer/0/id/"+Posted_by_userID + "/answer/" +  ansID)
+		.success(function(response) {
+			if(response.result == 'success'){
+				//alert("You Rated an Answer Posted By "+nickname);
+				$('.RateAnswerSucDiv').html(response.message).show(1000).delay(3000).hide(1000);
+		    	}
+		    	else if(response.result == 'fail')
+		    		{
+		    		
+		    		//Scroll Up to Top
+			    	$('html, body').animate({
+			            scrollTop: $("#TopDiv").offset().top
+			        }, 1000);
+		    		$('.RateAnswerDiv').html(response.message).show(1000).delay(3000).hide(1000);
+		    		}
+		   
+		});
+		};
+
+
+	//answer quesion func
+	$scope.AnswerQuest = function(){
+			
+	        if($scope.answerText !=''){
+	        	 
+	        	// create js object
+	    		var Quest = new Object();
+	    	    Quest.Content = $scope.answerText;
+	    	    Quest.questID = $scope.questID;
+	    	    var qid = Quest.questID;
+
+	    	    // make a call to the server
+	        	var req = $http({
+	                method: "post",
+	                url: "/WebAppProj/PostAnswer/id/" + qid ,
+	                contentType: "application/json; charset=utf-8",
+	                dataType: 'json',
+	    	        data: JSON.stringify(Quest)
+	            });
+	    	    
+	    	    req.success(function(response) {
+	    	    	// hide modal after replying is done
+	    			$('#AnswerQuestModal').modal('hide');
+	    			$scope.answeText = ''; //clear
+	    	    	//Scroll Up to Top
+	    	    	$('html, body').animate({
+	    	            scrollTop: $("#TopDiv").offset().top
+	    	        }, 1000);
+	    	    	$('.alertPostAnswSuc').show(1000).delay(3000).hide(1000); // show for 3 seconds and hide
+	    	    	$scope.answerText = ""; //clear answerText
+	    		});	
+
+	        }
+	        else{
+	        alert('Please Provide and Answer!');
+	        }
+			
+			};
+	
+
+
+	// show answer modal fun
+	$scope.AnswerQuestModalPop = function(questID){
+		//$scope.replyText = ; // 
+		$scope.questID = questID;
+		$('#AnswerQuestModal').modal('show'); // show reply modal 
+		};
+	
+
+
+	
+	
+	}]);
+ </script>
+
+
+ 	<!-- Modal Javascript -->
+    <script>
+	
+    $('#AnswerQuestModal').on('shown.bs.modal', function () {
+
+        $('#answerText').focus(); // as soon as the modal shown focus on textarea        
+    })
+    
+	</script>
+    <!-- Modal Javascript -->
+
+
+</body>
+</html>

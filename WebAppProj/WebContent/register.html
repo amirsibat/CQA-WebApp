@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>CQA Register</title>
+
+
+        <!-- Javascript -->
+        <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+        <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/jquery.backstretch.min.js"></script>
+        <script type="text/javascript" src="js/scripts.js"></script>
+        
+        <!--[if lt IE 10]>
+            <script src="assets/js/placeholder.js"></script>
+        <![endif]-->
+
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,100,300,500">
+        <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+		<link rel="stylesheet" href="css/form-elements.css">
+        <link rel="stylesheet" href="css/style.css">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <!-- Favicon -->
+        
+        
+
+<!-- JavaScript-->
+<script type="text/javascript">
+	$(document).ready(function() {
+		
+		function wordCount( val ){
+		    return val.match(/\S+/g).length;
+		}
+		
+		
+		//Name can't be blank function called on user input
+		$('#username').on('input', function() {
+			var input=$(this);
+			var letters = /^[A-Za-z]+$/;  
+
+			var is_username=input.val();
+			if(is_username && is_username.length < 11 ){
+				input.removeClass("invalid"); // remove invalid class
+				$('#usernameE').fadeOut(500); // hide the error msg in 500ms
+				}
+			else if(is_username && is_username.length > 10){
+				input.addClass("invalid"); // add invalid error class
+				$('#usernameE').fadeIn(500); // show the error msg in 500ms
+				}
+			else if(!is_username){
+				input.addClass("invalid");
+				$('#usernameE').fadeOut(500); // hide the error msg in 500ms
+			}
+			else if(!is_username.value.match(letters)) {
+				input.addClass("invalid");
+				$('#usernameE').fadeOut(500); // hide the error msg in 500ms
+			}
+		});
+		
+		//function called on user input 
+		$('#password').on('input', function() {
+			var input=$(this);
+			var is_pass=input.val();
+			if(is_pass && is_pass.length < 9 ){
+				input.removeClass("invalid"); // remove invalid class
+				$('#passwordE').fadeOut(500); // hide the error msg in 500ms
+				}
+			else if(is_pass && is_pass.length > 8){
+				input.addClass("invalid"); // add invalid error class
+				$('#passwordE').fadeIn(500); // show the error msg in 500ms
+				}
+			else if(!is_pass){
+				input.addClass("invalid");
+				$('#passwordE').fadeOut(500); // hide the error msg in 500ms
+			}
+		});
+		
+		//nickname can't be blank & less than 10 function called on user input
+		$('#nickname').on('input', function() {
+			var input=$(this);
+			var is_nickname=input.val();
+			if(is_nickname && is_nickname.length < 21 ){
+				input.removeClass("invalid"); // remove invalid class
+				$('#nicknameE').fadeOut(500); // hide the error msg in 500ms
+				}
+			else if(is_nickname && is_nickname.length > 20){
+				input.addClass("invalid"); // add invalid error class
+				$('#nicknameE').fadeIn(500); // show the error msg in 500ms
+				}
+			else if(!is_nickname){
+				input.addClass("invalid");
+				$('#nicknameE').fadeOut(500); // hide the error msg in 500ms
+			}
+		});
+
+		//function called on user input checks if less than 50 
+		$('#description').on('input', function() {
+			var input=$(this);
+			var is_desc=input.val();
+			
+			//if description word count is bigger than 50
+			if(is_desc && wordCount(is_desc) > 50){
+				input.addClass("invalid"); // add invalid error class
+				$('#descriptionE').fadeIn(500); // show the error msg in 500ms
+				}
+			else if(!is_desc || wordCount(is_desc) < 51){
+				input.removeClass("invalid");
+				$('#descriptionE').fadeOut(500); // hide the error msg in 500ms
+			}
+		});
+		
+		
+		//Photourl must start with http:// or www. function is called on user input
+		$('#photourl').on('input', function() {
+			var input=$(this);
+			if (input.val().substring(0,4)=='www.'){input.val('http://www.'+input.val().substring(4));}
+			var re = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/;
+			var is_url=re.test(input.val());
+			if(is_url){
+				input.removeClass("invalid");
+				$('#photourlE').fadeOut(500);
+				}
+			else{
+				input.addClass("invalid");
+				$('#photourlE').fadeIn(500);
+				}
+		});
+		
+		
+		//After Form is Submitted Validate the inputs
+		$("#RegisterButton").click(function(event){
+			var form_data=$("#registerForm").serializeArray(); // Get All HTML objects inside the form
+			var has_error=false;
+			//alert("1");
+			for (var input in form_data)
+			{ // loop over the objects
+				var element=$("#"+form_data[input]['name']); // concatinate # to the form input name to get the object
+				var invalid=element.hasClass("invalid");
+				var error_element=$("#"+form_data[input]['name']+"E");
+				if(element.attr('id') !="photourl" && element.attr('id') !="description")
+				{ //can be empty
+					if (invalid || !element.val() ){
+						error_element.fadeIn(500); element.addClass("invalid"); has_error=true;
+						}
+					else{
+						error_element.fadeOut(500);
+						}
+				
+				}
+				
+			}
+			if (has_error){
+				event.preventDefault(); // prevent form from sumbmitting
+				alert("error");
+			}
+			else{
+				// create js object to send it to the server
+				//alert("2");
+				var user = new Object();
+			    user.Username = $('#username').val();
+			    user.Password = $('#password').val();
+			    user.Nickname = $('#nickname').val();
+			    user.Description = $('#description').val();
+			    user.PhotoURL = $('#photourl').val();
+			    //alert("object done");
+
+			    $.ajax({
+			        url: "/WebAppProj/user/RegisterUser",
+			        type: 'POST',
+			        dataType: 'json',
+			        data: JSON.stringify(user),
+			        contentType: "application/json; charset=utf-8"
+			    	})
+					
+			    	.done(function (data) {
+			    		if(data.result == "registered"){
+							console.log("registered");
+							$('.alertUserExist').hide(); // hide error message
+							$('.alertUserSuccess').fadeIn(500); // show message success
+							window.location.pathname = "/WebAppProj/cqa.html"; // send user to cqa.html
+			    		}
+				        	else{ $('.alertUserSuccess').hide(); $('.alertUserExist').fadeIn(500); console.log("exist"); }
+			    	 })
+			    	 .fail( function (data) {
+			    		 console.log(data);
+			    	 });
+			    	
+
+				
+			}
+		});	
+		
+	});
+		
+	</script>
+
+
+    </head>
+
+    <body>
+
+        <!-- Top content -->
+        <div class="top-content">
+        	
+            <div class="inner-bg">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-8 col-sm-offset-2 text">
+                            <h1><strong>CQA</strong> Register Form</h1>
+                            <div class="description">
+                            	
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-sm-offset-3 form-box">
+                        	<div class="form-top">
+                        		<div class="form-top-left">
+                        			<h3>Register to our site</h3>
+                            		
+									
+                        		</div>
+                        		<div class="form-top-right">
+                        			<i class="fa fa-lock"></i>
+                        		</div>
+                            </div>
+
+                            <div class="alert alert-success alert-dismissible alertUserSuccess" role="alert">
+							REGISTRATION COMPLETE, CLICK <a href="index.html">HERE</a> TO RETURN TO LOGIN PAGE
+							</div>
+							<div class="alert alert-danger alert-dismissible alertUserExist" role="alert">USERNAME/NICKNAME ALREADY EXISTS</div>
+							
+
+                            <div class="form-bottom">
+			                   
+			                    <form class="login-form" id="registerForm" role="form" action="/WebAppProj/user/RegisterUser" method="POST">
+
+			                    	<div class="form-group">
+			                    		<label class="sr-only" for="username">Username</label>
+			                        	<input type="text" name="username" placeholder="Username" class="form-username form-control" id="username">
+			                        </div>
+			                        <p id="usernameE" class="notice">10 chars max</p>
+
+
+			                        <div class="form-group">
+			                    		<label class="sr-only" for="nickname">Nickname</label>
+			                        	<input type="text" name="nickname" placeholder="Nickname" class="form-username form-control" id="nickname">
+			                        </div>
+			                        <p id="nicknameE" class="notice">20 chars max</p>
+
+
+			                        <div class="form-group">
+			                        	<label class="sr-only" for="password">Password</label>
+			                        	<input type="password" name="password" placeholder="Password" class="form-password form-control" id="password">
+			                        </div>
+			                        <p id="passwordE" class="notice">8 chars max</p>
+
+
+			                           <div class="form-group">
+			                        	<label class="sr-only" for="description">Description</label>
+			                        	<textarea rows="4" name="description" placeholder="Description" class="form-username form-control" id="description"></textarea>
+			                        </div>
+			                        <p id="descriptionE" class="notice">50 words max</p>
+
+
+			                           <div class="form-group">
+			                        	<label class="sr-only" for="photourl">Photo Url</label>
+			                        	<input type="text" name="photourl" placeholder="Photo Url" class="form-username form-control" id="photourl">
+			                        </div>
+			                        <p id="photourlE" class="notice">Invalid URL</p>
+
+			                       <div class="form-group">
+										<button id="RegisterButton" type="button" class="btn">Register</button>
+									</div>
+									<p>Already have an account? <a href="index.html">Login</a>.</p>
+			                    </form>
+		                    </div>
+                        </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        </div>
+
+    
+    </body>
+
+</html>
