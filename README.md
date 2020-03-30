@@ -5,6 +5,7 @@ The goal of this project is to implement a Community Question-Answering (CQA) se
 Example real-life CQA services include Yahoo! Answers, Quora, StackOverflow, etc.
 
 Server Side - Java
+
 Client Side - AngularJS
 DB - Derby(sql) 
 Tomcat v7
